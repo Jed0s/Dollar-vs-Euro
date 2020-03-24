@@ -49,9 +49,10 @@ class Game extends React.Component {
         this.state = {
             history: [{
                 squares: Array(9).fill(null),
+                coordinates: Array(9).fill(null),
             }],
             stepNumber: 0,
-            xIsNext: true,
+            dollarIsNext: true,
         };
     }
 
@@ -59,23 +60,25 @@ class Game extends React.Component {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length-1];
         const squares = current.squares.slice();
+        const coordinates = calculateCoordinates(i);
         if (calculateWinner(squares) || squares[i]) {
             return;
         }
-        squares[i] = this.state.xIsNext ? '$' : '€';
+        squares[i] = this.state.dollarIsNext ? '$' : '€';
         this.setState({
             history: history.concat([{
                 squares: squares,
+                coordinates: coordinates
             }]),
             stepNumber: history.length,
-            xIsNext: !this.state.xIsNext,
+            dollarIsNext: !this.state.dollarIsNext,
         });
     }
 
     jumpTo(step) {
         this.setState({
             stepNumber: step,
-            xIsNext: (step % 2) === 0,
+            dollarIsNext: (step % 2) === 0,
         });
     }
 
@@ -86,7 +89,7 @@ class Game extends React.Component {
 
         const moves = history.map((step, move) => {
             const desc = move ?
-                `Go to move #${move}` :
+                `Go to move #${move}| [${step.coordinates}]` :
                 'Go to start of game';
             return (
                 <li key={ move }>
@@ -100,7 +103,7 @@ class Game extends React.Component {
             status = `${winner} won!`;
         }
         else {
-            status = `Waiting fo the ${this.state.xIsNext ? '$' : '€'} to move`;
+            status = `Waiting fo the ${this.state.dollarIsNext ? '$' : '€'} to move`;
         }
 
         return (
@@ -108,6 +111,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={ current.squares }
+                        coordinates = { current.coordinates }
                         onClick={ (i) => this.handleClick(i) }
                     />
                 </div>
@@ -138,6 +142,18 @@ function calculateWinner(squares) {
         }
     }
     return null;
+}
+
+function calculateCoordinates(value) {
+    if (value === 0) { return [1,1] }
+    else if (value === 1) { return [1,2] }
+    else if (value === 2) { return [1,3] }
+    else if (value === 3) { return [2,1] }
+    else if (value === 4) { return [2,2] }
+    else if (value === 5) { return [2,3] }
+    else if (value === 6) { return [3,1] }
+    else if (value === 7) { return [3,2] }
+    else { return [3,3] }
 }
 
 // ========================================
